@@ -77,7 +77,7 @@ class _PosterPlaceholder extends StatelessWidget {
                 ),
               )
             : Icon(
-                Icons.movie_creation_outlined,
+                Icons.sports_esports_outlined,
                 color: colorScheme.primary,
                 size: 34,
               ),

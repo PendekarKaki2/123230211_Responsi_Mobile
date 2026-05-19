@@ -19,9 +19,9 @@ class FavoritePage extends StatelessWidget {
 
       if (favorites.isEmpty) {
         return const StateMessage(
-          icon: Icons.favorite_border_rounded,
-          title: 'Belum ada favorit',
-          message: 'Tambahkan show dari halaman Home atau Detail.',
+          icon: Icons.collections_bookmark_outlined,
+          title: 'Library masih kosong',
+          message: 'Dapatkan game dari halaman Home atau Detail.',
         );
       }
 
@@ -48,7 +48,7 @@ class FavoritePage extends StatelessWidget {
               show: show,
               showFavoriteButton: false,
               trailing: IconButton(
-                tooltip: 'Hapus favorit',
+                tooltip: 'Hapus dari Library',
                 onPressed: () async {
                   final shouldDelete = await _confirmDelete(context, show);
                   if (shouldDelete == true) {
@@ -74,8 +74,8 @@ class FavoritePage extends StatelessWidget {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('Hapus favorit?'),
-              content: Text('${show.name} akan dihapus dari daftar favorit.'),
+              title: const Text('Hapus dari Library?'),
+              content: Text('${show.name} akan dihapus dari daftar game.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),

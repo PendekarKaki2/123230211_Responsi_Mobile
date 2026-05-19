@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/game.dart';
 
 class FavoriteService extends GetxService {
-  static const _boxName = 'favorite_shows';
+  static const _boxName = 'library_games';
 
   late final Box<dynamic> _box = Hive.box<dynamic>(_boxName);
 

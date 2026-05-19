@@ -22,7 +22,7 @@ class _MainPageState extends State<MainPage> {
 
   final _pages = const [HomePage(), FavoritePage(), ProfilePage()];
 
-  final _titles = const ['Daftar Shows', 'Favorit', 'Profil'];
+  final _titles = const ['Hydra Games', 'Library', 'Profil'];
 
   @override
   Widget build(BuildContext context) {
@@ -50,17 +50,17 @@ class _MainPageState extends State<MainPage> {
               () => Badge.count(
                 count: _favoriteController.favorites.length,
                 isLabelVisible: _favoriteController.favorites.isNotEmpty,
-                child: const Icon(Icons.favorite_border_rounded),
+                child: const Icon(Icons.collections_bookmark_outlined),
               ),
             ),
             activeIcon: Obx(
               () => Badge.count(
                 count: _favoriteController.favorites.length,
                 isLabelVisible: _favoriteController.favorites.isNotEmpty,
-                child: const Icon(Icons.favorite_rounded),
+                child: const Icon(Icons.collections_bookmark_rounded),
               ),
             ),
-            label: 'Favorit',
+            label: 'Library',
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.person_outline_rounded),

@@ -13,14 +13,14 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _authController = Get.find<AuthController>();
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     await _authController.login(
-      usernameInput: _usernameController.text,
+      usernameInput: _emailController.text,
       passwordInput: _passwordController.text,
     );
   }
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Masuk untuk melihat daftar game, menyimpan favorit, dan membuka profil.',
+                    'Masuk untuk browsing game, menyimpan library, dan membuka profil.',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: colorScheme.onSurface.withValues(alpha: 0.68),
                     ),
@@ -83,15 +83,16 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         TextFormField(
-                          controller: _usernameController,
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
-                            labelText: 'Username',
-                            prefixIcon: Icon(Icons.person_outline_rounded),
+                            labelText: 'Email',
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Username tidak boleh kosong';
+                              return 'Email tidak boleh kosong';
                             }
                             return null;
                           },
@@ -154,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Untuk latihan ini username dan password bebas.',
+                    'Untuk latihan ini email dan password bebas.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurface.withValues(alpha: 0.58),
                     ),

@@ -45,7 +45,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Latihan Responsi Praktikum Mobile',
+                      'Akun Hydra Games',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurface.withValues(alpha: 0.64),
                       ),
@@ -62,9 +62,18 @@ class ProfilePage extends StatelessWidget {
           children: [
             Obx(
               () => _InfoTile(
-                icon: Icons.favorite_rounded,
-                label: 'Total favorit',
-                value: '${favoriteController.favorites.length} show',
+                icon: Icons.email_outlined,
+                label: 'Email',
+                value: authController.username.value.isEmpty
+                    ? 'Belum login'
+                    : authController.username.value,
+              ),
+            ),
+            Obx(
+              () => _InfoTile(
+                icon: Icons.collections_bookmark_rounded,
+                label: 'Jumlah games pada library',
+                value: '${favoriteController.favorites.length} game',
               ),
             ),
             const _InfoTile(
@@ -74,7 +83,7 @@ class ProfilePage extends StatelessWidget {
             ),
             const _InfoTile(
               icon: Icons.inventory_2_rounded,
-              label: 'Penyimpanan favorit',
+              label: 'Penyimpanan library',
               value: 'Hive',
             ),
             const _InfoTile(

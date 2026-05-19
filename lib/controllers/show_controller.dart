@@ -11,7 +11,7 @@ class ShowController extends GetxController {
   final errorMessage = ''.obs;
   final searchQuery = ''.obs;
   final selectedGenre = 'Semua'.obs;
-  final isGridView = true.obs;
+  final isGridView = false.obs;
 
   @override
   void onInit() {
@@ -48,8 +48,8 @@ class ShowController extends GetxController {
     final genre = selectedGenre.value;
 
     return shows.where((show) {
-      final matchesSearch = show.name.toLowerCase().contains(query);
-      final matchesGenre = genre == 'Semua' || show.genres.contains(genre);
+      final matchesSearch = show.title.toLowerCase().contains(query);
+      final matchesGenre = genre == 'Semua' || show.genre == genre;
       return matchesSearch && matchesGenre;
     }).toList();
   }
@@ -57,7 +57,9 @@ class ShowController extends GetxController {
   List<String> get genres {
     final genreSet = <String>{};
     for (final show in shows) {
-      genreSet.addAll(show.genres);
+      if (show.genre.trim().isNotEmpty) {
+        genreSet.add(show.genre);
+      }
     }
     final sortedGenres = genreSet.toList()..sort();
     return ['Semua', ...sortedGenres];

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../controllers/favorite_controller.dart';
 import '../models/game.dart';
-import 'rating_chip.dart';
 import 'game_poster.dart';
 
 class ShowCard extends StatelessWidget {
@@ -41,12 +40,7 @@ class ShowCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ShowPoster(imageUrl: show.mediumImage ?? show.originalImage),
-              Positioned(
-                left: 8,
-                bottom: 8,
-                child: RatingChip(ratingLabel: show.ratingLabel, compact: true),
-              ),
+              ShowPoster(imageUrl: show.posterUrl),
               if (showFavoriteButton)
                 Positioned(
                   top: 4,
@@ -73,13 +67,24 @@ class ShowCard extends StatelessWidget {
               ),
               const SizedBox(height: 5),
               Text(
-                show.genres.take(2).join(' | '),
+                show.genreLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(
                     context,
                   ).colorScheme.onSurface.withValues(alpha: 0.62),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                show.platformLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.56),
                 ),
               ),
             ],
@@ -91,14 +96,10 @@ class ShowCard extends StatelessWidget {
 
   Widget _buildListContent(BuildContext context) {
     return SizedBox(
-      height: 142,
+      height: 128,
       child: Row(
         children: [
-          ShowPoster(
-            imageUrl: show.mediumImage ?? show.originalImage,
-            width: 96,
-            height: 142,
-          ),
+          ShowPoster(imageUrl: show.posterUrl, width: 124, height: 128),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 12, 8, 12),
@@ -115,17 +116,14 @@ class ShowCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  RatingChip(ratingLabel: show.ratingLabel),
-                  const Spacer(),
-                  Text(
-                    show.genreLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.64),
-                    ),
+                  _MetaLine(
+                    icon: Icons.category_outlined,
+                    text: show.genreLabel,
+                  ),
+                  const SizedBox(height: 6),
+                  _MetaLine(
+                    icon: Icons.devices_rounded,
+                    text: show.platformLabel,
                   ),
                 ],
               ),
@@ -144,6 +142,36 @@ class ShowCard extends StatelessWidget {
   }
 }
 
+class _MetaLine extends StatelessWidget {
+  const _MetaLine({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: colorScheme.primary),
+        const SizedBox(width: 5),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.66),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _FavoriteButton extends StatelessWidget {
   const _FavoriteButton({required this.show, this.compact = false});
 
@@ -157,7 +185,7 @@ class _FavoriteButton extends StatelessWidget {
     return Obx(() {
       final isFavorite = favoriteController.isFavorite(show.id);
       return IconButton.filledTonal(
-        tooltip: isFavorite ? 'Hapus favorit' : 'Tambah favorit',
+        tooltip: isFavorite ? 'Hapus dari Library' : 'Dapatkan game',
         iconSize: compact ? 18 : 22,
         constraints: BoxConstraints.tightFor(
           width: compact ? 36 : 42,
@@ -166,7 +194,9 @@ class _FavoriteButton extends StatelessWidget {
         visualDensity: VisualDensity.compact,
         onPressed: () => favoriteController.toggleFavorite(show),
         icon: Icon(
-          isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          isFavorite
+              ? Icons.collections_bookmark_rounded
+              : Icons.add_task_rounded,
         ),
       );
     });

@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
                 hasScrollBody: false,
                 child: StateMessage(
                   icon: Icons.search_off_rounded,
-                  title: 'Show tidak ditemukan',
+                  title: 'Game tidak ditemukan',
                   message: 'Coba ubah kata kunci atau filter genre.',
                 ),
               )
@@ -112,7 +112,7 @@ class _HomeControls extends StatelessWidget {
             controller: searchController,
             onChanged: showController.setSearchQuery,
             decoration: InputDecoration(
-              hintText: 'Cari judul show',
+              hintText: 'Cari nama game',
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: Obx(
                 () => showController.searchQuery.value.isEmpty
@@ -154,14 +154,14 @@ class _HomeControls extends StatelessWidget {
           Row(
             children: [
               Icon(
-                Icons.movie_filter_outlined,
+                Icons.sports_esports_outlined,
                 size: 18,
                 color: colorScheme.primary,
               ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Menampilkan $resultCount dari $totalCount show',
+                  'Menampilkan $resultCount dari $totalCount game',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -29,7 +29,7 @@ class AuthController extends GetxController {
     final trimmedPassword = passwordInput.trim();
 
     if (trimmedUsername.isEmpty || trimmedPassword.isEmpty) {
-      _showWarning('Username dan password wajib diisi.');
+      _showWarning('Email dan password wajib diisi.');
       return;
     }
 

@@ -25,7 +25,7 @@ void main() {
     await tester.pumpWidget(const MyApp(initialRoute: AppRoutes.login));
 
     expect(find.text('Hydra Games'), findsOneWidget);
-    expect(find.text('Username'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
     expect(find.text('Masuk'), findsOneWidget);
   });

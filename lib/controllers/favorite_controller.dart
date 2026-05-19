@@ -20,20 +20,20 @@ class FavoriteController extends GetxController {
   }
 
   bool isFavorite(int id) {
-    return favorites.any((show) => show.id == id);
+    return favorites.any((game) => game.id == id);
   }
 
-  Future<void> toggleFavorite(Game show) async {
-    if (isFavorite(show.id)) {
-      await removeFavorite(show.id, showName: show.name, showMessage: true);
+  Future<void> toggleFavorite(Game game) async {
+    if (isFavorite(game.id)) {
+      await removeFavorite(game.id, showName: game.name, showMessage: true);
       return;
     }
 
-    await _favoriteService.addFavorite(show);
+    await _favoriteService.addFavorite(game);
     loadFavorites();
     _showSnackBar(
-      title: 'Ditambahkan',
-      message: '${show.name} masuk ke favorit.',
+      title: 'Berhasil didapatkan',
+      message: '${game.name} masuk ke Library.',
       color: Colors.green,
     );
   }
@@ -43,7 +43,7 @@ class FavoriteController extends GetxController {
     String? showName,
     bool showMessage = false,
   }) async {
-    final removedShow = favorites.firstWhereOrNull((show) => show.id == id);
+    final removedShow = favorites.firstWhereOrNull((game) => game.id == id);
     await _favoriteService.removeFavorite(id);
     loadFavorites();
 
@@ -51,7 +51,7 @@ class FavoriteController extends GetxController {
       _showSnackBar(
         title: 'Dihapus',
         message:
-            '${showName ?? removedShow?.name ?? 'Show'} dihapus dari favorit.',
+            '${showName ?? removedShow?.name ?? 'Game'} dihapus dari Library.',
         color: Colors.red,
       );
     }

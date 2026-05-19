@@ -17,12 +17,12 @@ class ApiException implements Exception {
 class TvMazeApiService extends GetxService {
   TvMazeApiService({http.Client? client}) : _client = client ?? http.Client();
 
-  static const _baseUrl = 'https://www.freetogame.com/api/games';
+  static const _baseUrl = 'https://www.freetogame.com/api';
 
   final http.Client _client;
 
   Future<List<Game>> fetchGames() async {
-    final uri = Uri.parse('$_baseUrl');
+    final uri = Uri.parse('$_baseUrl/games');
     final response = await _client
         .get(uri)
         .timeout(const Duration(seconds: 15));
@@ -46,7 +46,7 @@ class TvMazeApiService extends GetxService {
   }
 
   Future<Game> fetchGameDetail(int id) async {
-    final uri = Uri.parse('_baseUrl/games/$id');
+    final uri = Uri.parse('$_baseUrl/game?id=$id');
     final response = await _client
         .get(uri)
         .timeout(const Duration(seconds: 15));
@@ -64,6 +64,11 @@ class TvMazeApiService extends GetxService {
     if (decoded is! Map<String, dynamic>) {
       throw ApiException('Format data detail game tidak sesuai.');
     }
+    if (decoded['status'] == 0) {
+      throw ApiException(
+        decoded['status_message']?.toString() ?? 'Game tidak ditemukan.',
+      );
+    }
 
     return Game.fromJson(decoded);
   }
@@ -74,28 +79,10 @@ class TvMazeApiService extends GetxService {
       return fetchGames();
     }
 
-    final uri = Uri.parse(
-      '$_baseUrl/search/games?q=${Uri.encodeQueryComponent(trimmedQuery)}',
-    );
-    final response = await _client
-        .get(uri)
-        .timeout(const Duration(seconds: 15));
-
-    if (response.statusCode != 200) {
-      throw ApiException('Gagal mencari game (${response.statusCode}).');
-    }
-
-    final decoded = jsonDecode(response.body);
-    if (decoded is! List<dynamic>) {
-      throw ApiException('Format data pencarian tidak sesuai.');
-    }
-
-    return decoded
-        .whereType<Map<String, dynamic>>()
-        .map((item) => item['game'])
-        .whereType<Map<String, dynamic>>()
-        .map(Game.fromJson)
-        .where((game) => game.id != 0)
+    final games = await fetchGames();
+    final loweredQuery = trimmedQuery.toLowerCase();
+    return games
+        .where((game) => game.title.toLowerCase().contains(loweredQuery))
         .toList();
   }
 }

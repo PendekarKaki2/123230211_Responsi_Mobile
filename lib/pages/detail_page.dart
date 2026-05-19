@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../controllers/favorite_controller.dart';
 import '../models/game.dart';
 import '../services/tvmaze_api_service.dart';
-import '../widgets/rating_chip.dart';
 import '../widgets/game_poster.dart';
 import '../widgets/state_message.dart';
 
@@ -19,7 +18,7 @@ class _DetailPageState extends State<DetailPage> {
   final _apiService = Get.find<TvMazeApiService>();
 
   late final int _gameId;
-  Game? _initialShow;
+  Game? _initialGame;
   late Future<Game> _detailFuture;
 
   @override
@@ -32,7 +31,7 @@ class _DetailPageState extends State<DetailPage> {
   void _readArguments() {
     final argument = Get.arguments;
     if (argument is Game) {
-      _initialShow = argument;
+      _initialGame = argument;
       _gameId = argument.id;
       return;
     }
@@ -64,11 +63,11 @@ class _DetailPageState extends State<DetailPage> {
         future: _detailFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting &&
-              _initialShow == null) {
+              _initialGame == null) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError && _initialShow == null) {
+          if (snapshot.hasError && _initialGame == null) {
             return StateMessage(
               icon: Icons.error_outline_rounded,
               title: 'Detail gagal dimuat',
@@ -78,9 +77,9 @@ class _DetailPageState extends State<DetailPage> {
             );
           }
 
-          final show = snapshot.data ?? _initialShow!;
+          final game = snapshot.data ?? _initialGame!;
           return _DetailContent(
-            show: show,
+            game: game,
             isRefreshing: snapshot.connectionState == ConnectionState.waiting,
             warningMessage: snapshot.hasError
                 ? snapshot.error.toString()
@@ -94,12 +93,12 @@ class _DetailPageState extends State<DetailPage> {
 
 class _DetailContent extends StatelessWidget {
   const _DetailContent({
-    required this.show,
+    required this.game,
     required this.isRefreshing,
     this.warningMessage,
   });
 
-  final Game show;
+  final Game game;
   final bool isRefreshing;
   final String? warningMessage;
 
@@ -109,52 +108,7 @@ class _DetailContent extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
-          child: Stack(
-            children: [
-              SizedBox(
-                height: 360,
-                width: double.infinity,
-                child: ShowPoster(imageUrl: show.posterUrl),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.72),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 18,
-                right: 18,
-                bottom: 18,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      show.name,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            height: 1.1,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    RatingChip(ratingLabel: show.ratingLabel),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+        SliverToBoxAdapter(child: _HeroHeader(game: game)),
         if (isRefreshing)
           const SliverToBoxAdapter(child: LinearProgressIndicator()),
         if (warningMessage != null)
@@ -180,29 +134,18 @@ class _DetailContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _FavoriteAction(show: show),
+                _LibraryAction(game: game),
                 const SizedBox(height: 18),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: show.genres.isEmpty
-                      ? [const Chip(label: Text('Tidak ada genre'))]
-                      : show.genres
-                            .map((genre) => Chip(label: Text(genre)))
-                            .toList(),
-                ),
-                const SizedBox(height: 18),
-                _InfoPanel(show: show),
-                const SizedBox(height: 20),
-                Text(
-                  'Overview',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-                ),
+                _InfoPanel(game: game),
+                const SizedBox(height: 22),
+                _SectionTitle(title: 'Screenshots'),
+                const SizedBox(height: 10),
+                _ScreenshotList(images: game.screenshots),
+                const SizedBox(height: 22),
+                _SectionTitle(title: 'Deskripsi'),
                 const SizedBox(height: 8),
                 Text(
-                  show.summary,
+                  game.descriptionLabel,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     height: 1.45,
                     color: colorScheme.onSurface.withValues(alpha: 0.78),
@@ -218,63 +161,166 @@ class _DetailContent extends StatelessWidget {
   }
 }
 
-class _FavoriteAction extends StatelessWidget {
-  const _FavoriteAction({required this.show});
+class _HeroHeader extends StatelessWidget {
+  const _HeroHeader({required this.game});
 
-  final Game show;
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 300,
+          width: double.infinity,
+          child: ShowPoster(imageUrl: game.posterUrl),
+        ),
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.78),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 18,
+          right: 18,
+          bottom: 18,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                game.title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  height: 1.12,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _HeroChip(icon: Icons.category_outlined, label: game.genre),
+                  _HeroChip(icon: Icons.devices_rounded, label: game.platform),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HeroChip extends StatelessWidget {
+  const _HeroChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.black87),
+          const SizedBox(width: 5),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LibraryAction extends StatelessWidget {
+  const _LibraryAction({required this.game});
+
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
     final favoriteController = Get.find<FavoriteController>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Obx(() {
-      final isFavorite = favoriteController.isFavorite(show.id);
+      final isOwned = favoriteController.isFavorite(game.id);
       return SizedBox(
         width: double.infinity,
         height: 50,
-        child: FilledButton.icon(
-          onPressed: () => favoriteController.toggleFavorite(show),
-          icon: Icon(
-            isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          ),
-          label: Text(isFavorite ? 'Hapus dari Favorit' : 'Tambah ke Favorit'),
-        ),
+        child: isOwned
+            ? OutlinedButton.icon(
+                onPressed: () => favoriteController.toggleFavorite(game),
+                icon: const Icon(Icons.check_circle_rounded),
+                label: const Text('Sudah di Library'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: colorScheme.primary,
+                  side: BorderSide(color: colorScheme.primary, width: 1.4),
+                ),
+              )
+            : FilledButton.icon(
+                onPressed: () => favoriteController.toggleFavorite(game),
+                icon: const Icon(Icons.add_task_rounded),
+                label: const Text('Dapatkan Game'),
+              ),
       );
     });
   }
 }
 
 class _InfoPanel extends StatelessWidget {
-  const _InfoPanel({required this.show});
+  const _InfoPanel({required this.game});
 
-  final Game show;
+  final Game game;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _InfoRow(
-          icon: Icons.translate_rounded,
-          label: 'Bahasa',
-          value: show.language ?? 'Tidak diketahui',
-        ),
-        _InfoRow(
-          icon: Icons.flag_outlined,
-          label: 'Status',
-          value: show.status ?? 'Tidak diketahui',
-        ),
-        _InfoRow(
-          icon: Icons.event_available_rounded,
-          label: 'Premier',
-          value: show.premiered ?? 'Tidak diketahui',
-        ),
-        _InfoRow(
-          icon: Icons.schedule_rounded,
-          label: 'Jadwal',
-          value: show.schedule ?? 'Tidak diketahui',
-          isLast: true,
-        ),
-      ],
+    return Card(
+      child: Column(
+        children: [
+          _InfoRow(
+            icon: Icons.event_available_rounded,
+            label: 'Tanggal Rilis',
+            value: game.releaseDate,
+          ),
+          _InfoRow(
+            icon: Icons.business_rounded,
+            label: 'Publisher',
+            value: game.publisher,
+          ),
+          _InfoRow(
+            icon: Icons.code_rounded,
+            label: 'Developer',
+            value: game.developer,
+          ),
+          _InfoRow(
+            icon: Icons.verified_outlined,
+            label: 'Status',
+            value: game.status ?? 'Tidak diketahui',
+            isLast: true,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -297,7 +343,7 @@ class _InfoRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         border: Border(
           bottom: isLast
@@ -323,11 +369,68 @@ class _InfoRow extends StatelessWidget {
               textAlign: TextAlign.end,
               style: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ScreenshotList extends StatelessWidget {
+  const _ScreenshotList({required this.images});
+
+  final List<String> images;
+
+  @override
+  Widget build(BuildContext context) {
+    if (images.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(
+            context,
+          ).colorScheme.primaryContainer.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Text('Belum ada screenshot untuk game ini.'),
+      );
+    }
+
+    return SizedBox(
+      height: 166,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ShowPoster(imageUrl: images[index]),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(
+        context,
+      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
     );
   }
 }
